@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Ink Grimoire</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Removed external Lucide script to prevent loading errors -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=IM+Fell+English:ital@0;1&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Source+Serif+Pro:ital,wght@0,400;0,600;1,400&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; padding: 0; background-color: #1a1510; }
+        .font-cinzel { font-family: 'Cinzel', serif; }
+        .font-im-fell { font-family: 'IM Fell English', serif; }
+        .font-playfair { font-family: 'Playfair Display', serif; }
+        .font-cormorant { font-family: 'Cormorant Garamond', serif; }
+        .font-baskerville { font-family: 'Libre Baskerville', serif; }
+        .font-crimson { font-family: 'Crimson Text', serif; }
+        .font-lora { font-family: 'Lora', serif; }
+        .font-merriweather { font-family: 'Merriweather', serif; }
+        .font-source-serif { font-family: 'Source Serif Pro', serif; }
+        .font-spectral { font-family: 'Spectral', serif; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .perspective-1000 { perspective: 1000px; }
+        .perspective-1500 { perspective: 1500px; }
+        .ease-in-out-cubic { transition-timing-function: cubic-bezier(0.645, 0.045, 0.355, 1.000); }
+        
+        /* Page flip animations with proper lift effect */
+        @keyframes flipNextPage {
+            0% {
+                transform: translateY(0) translateZ(0) rotateY(0deg);
+            }
+            50% {
+                transform: translateY(-35px) translateZ(40px) rotateY(-90deg);
+            }
+            100% {
+                transform: translateY(0) translateZ(0) rotateY(-180deg);
+            }
+        }
+        
+        @keyframes flipPrevPage {
+            0% {
+                transform: translateY(0) translateZ(0) rotateY(-180deg);
+            }
+            50% {
+                transform: translateY(-35px) translateZ(40px) rotateY(-90deg);
+            }
+            100% {
+                transform: translateY(0) translateZ(0) rotateY(0deg);
+            }
+        }
+        
+        .flip-next-animation {
+            animation: flipNextPage 0.7s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+        }
+        
+        .flip-prev-animation {
+            animation: flipPrevPage 0.7s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+        }
+        
+        /* Slide animations */
+        @keyframes slideNextOut {
+            0% { transform: translateX(0); opacity: 1; }
+            100% { transform: translateX(-100%); opacity: 0; }
+        }
+        @keyframes slideNextIn {
+            0% { transform: translateX(100%); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slidePrevOut {
+            0% { transform: translateX(0); opacity: 1; }
+            100% { transform: translateX(100%); opacity: 0; }
+        }
+        @keyframes slidePrevIn {
+            0% { transform: translateX(-100%); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+        
+        .slide-next-out { animation: slideNextOut 0.5s ease-in-out forwards; }
+        .slide-next-in { animation: slideNextIn 0.5s ease-in-out forwards; }
+        .slide-prev-out { animation: slidePrevOut 0.5s ease-in-out forwards; }
+        .slide-prev-in { animation: slidePrevIn 0.5s ease-in-out forwards; }
+        
+        /* Fade animations */
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        
+        .fade-out { animation: fadeOut 0.4s ease-in-out forwards; }
+        .fade-in { animation: fadeIn 0.4s ease-in-out forwards; }
+        
+        /* Rise (vertical) animations */
+        @keyframes riseNextOut {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-50px) scale(0.95); opacity: 0; }
+        }
+        @keyframes riseNextIn {
+            0% { transform: translateY(50px) scale(0.95); opacity: 0; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        @keyframes risePrevOut {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(50px) scale(0.95); opacity: 0; }
+        }
+        @keyframes risePrevIn {
+            0% { transform: translateY(-50px) scale(0.95); opacity: 0; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        
+        .rise-next-out { animation: riseNextOut 0.5s ease-in-out forwards; }
+        .rise-next-in { animation: riseNextIn 0.5s ease-in-out forwards; }
+        .rise-prev-out { animation: risePrevOut 0.5s ease-in-out forwards; }
+        .rise-prev-in { animation: risePrevIn 0.5s ease-in-out forwards; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(120, 53, 15, 0.3); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(120, 53, 15, 0.6); }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- Internal Icon System (Replaces broken external library) ---
+        const Icon = ({ path, size = 24, className = "", ...props }) => (
+            <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width={size} 
+                height={size} 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                className={className} 
+                {...props}
+            >
+                {path}
+            </svg>
+        );
+
+        const Icons = {
+            Book: (props) => <Icon {...props} path={<><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></>} />,
+            QrCode: (props) => <Icon {...props} path={<><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></>} />,
+            Upload: (props) => <Icon {...props} path={<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></>} />,
+            Settings: (props) => <Icon {...props} path={<><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.47a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.39a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></>} />,
+            ArrowUp: (props) => <Icon {...props} path={<><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></>} />,
+            ArrowDown: (props) => <Icon {...props} path={<><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></>} />,
+            Edit2: (props) => <Icon {...props} path={<><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></>} />,
+            Save: (props) => <Icon {...props} path={<><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></>} />,
+            Trash2: (props) => <Icon {...props} path={<><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></>} />,
+            X: (props) => <Icon {...props} path={<><path d="M18 6 6 18"/><path d="m6 6 12 12"/></>} />,
+            ChevronLeft: (props) => <Icon {...props} path={<><path d="m15 18-6-6 6-6"/></>} />,
+            ChevronRight: (props) => <Icon {...props} path={<><path d="m9 18 6-6-6-6"/></>} />,
+            Maximize2: (props) => <Icon {...props} path={<><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" x2="14" y1="3" y2="10"/><line x1="3" x2="10" y1="21" y2="14"/></>} />,
+            Minimize2: (props) => <Icon {...props} path={<><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" x2="21" y1="10" y2="3"/><line x1="3" x2="10" y1="21" y2="14"/></>} />
+        };
+        
+        // --- Destructure Icons for easy usage ---
+        const { Book, QrCode, Upload, Settings, ArrowUp, ArrowDown, Edit2, Save, Trash2, X, ChevronLeft, ChevronRight, Maximize2, Minimize2 } = Icons;
+
+
+        // --- Font Options ---
+        const FONT_OPTIONS = [
+            { value: 'Cinzel', label: 'Cinzel', style: "'Cinzel', serif" },
+            { value: 'IM Fell English', label: 'IM Fell English', style: "'IM Fell English', serif" },
+            { value: 'Playfair Display', label: 'Playfair Display', style: "'Playfair Display', serif" },
+            { value: 'Cormorant Garamond', label: 'Cormorant Garamond', style: "'Cormorant Garamond', serif" },
+            { value: 'Libre Baskerville', label: 'Libre Baskerville', style: "'Libre Baskerville', serif" },
+            { value: 'Crimson Text', label: 'Crimson Text', style: "'Crimson Text', serif" },
+            { value: 'Lora', label: 'Lora', style: "'Lora', serif" },
+            { value: 'Merriweather', label: 'Merriweather', style: "'Merriweather', serif" },
+            { value: 'Source Serif Pro', label: 'Source Serif Pro', style: "'Source Serif Pro', serif" },
+            { value: 'Spectral', label: 'Spectral', style: "'Spectral', serif" }
+        ];
+
+        // --- Transition Effect Options ---
+        const TRANSITION_EFFECTS = [
+            { value: 'flip', label: 'Flip' },
+            { value: 'slide', label: 'Slide' },
+            { value: 'fade', label: 'Fade' },
+            { value: 'rise', label: 'Rise' }
+        ];
+
+        // --- Color Palettes ---
+        const COLOR_PALETTES = {
+            classic: {
+                name: 'Classic Grimoire',
+                bg: '#1a1510',
+                pageFront: '#f4e4bc',
+                pageBack: '#f0dec0',
+                accent: 'amber',
+                textPrimary: '#2c241b',
+                textSecondary: 'rgb(120, 53, 15)'
+            },
+            midnight: {
+                name: 'Midnight Eclipse',
+                bg: '#0a0a0f',
+                pageFront: '#1a1a2e',
+                pageBack: '#16161f',
+                accent: 'blue',
+                textPrimary: '#e0e0ff',
+                textSecondary: 'rgb(100, 100, 200)'
+            },
+            forest: {
+                name: 'Forest Moss',
+                bg: '#0d1410',
+                pageFront: '#d4e4d0',
+                pageBack: '#c8dcc4',
+                accent: 'green',
+                textPrimary: '#1a2e1a',
+                textSecondary: 'rgb(40, 80, 40)'
+            },
+            crimson: {
+                name: 'Crimson Leather',
+                bg: '#1a0a0a',
+                pageFront: '#f4e4e4',
+                pageBack: '#f0dede',
+                accent: 'red',
+                textPrimary: '#2c1a1a',
+                textSecondary: 'rgb(120, 30, 30)'
+            },
+            slate: {
+                name: 'Slate & Steel',
+                bg: '#0f1419',
+                pageFront: '#e4e8ec',
+                pageBack: '#dce0e4',
+                accent: 'slate',
+                textPrimary: '#1a2329',
+                textSecondary: 'rgb(60, 70, 80)'
+            }
+        };
+
+        // --- Initial Data ---
+        const INITIAL_PAGES = [
+            { id: 'cover', type: 'cover' },
+            {
+                id: 'img1',
+                type: 'content',
+                layout: 'single',
+                images: ['https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?auto=format&fit=crop&q=80&w=800'],
+                caption: 'Geometric Pattern Sheet',
+                description: 'Tribal arrows and diamond motifs.'
+            },
+            {
+                id: 'img1-back',
+                type: 'content',
+                layout: 'double-horizontal',
+                images: [
+                    'https://images.unsplash.com/photo-1621160383794-6b7dfbe36d67?auto=format&fit=crop&q=80&w=800',
+                    'https://images.unsplash.com/photo-1562962230-16e4623d36e6?auto=format&fit=crop&q=80&w=800'
+                ],
+                caption: 'Ankle & Foot Work',
+                description: 'Fine dotwork with ankle ornamentation.'
+            },
+            {
+                id: 'img2',
+                type: 'content',
+                layout: 'triple-grid',
+                images: [
+                    'https://images.unsplash.com/photo-1542317854-f9596af56dc8?auto=format&fit=crop&q=80&w=800',
+                    'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?auto=format&fit=crop&q=80&w=800',
+                    'https://images.unsplash.com/photo-1621160383794-6b7dfbe36d67?auto=format&fit=crop&q=80&w=800'
+                ],
+                caption: 'Pattern Collection',
+                description: 'Geometric designs and ornamental borders.'
+            },
+            { id: 'back-cover', type: 'back-cover' }
+        ];
+
+        function TattooBookApp() {
+            // --- State ---
+            const [pages, setPages] = useState(INITIAL_PAGES);
+            const [currentPage, setCurrentPage] = useState(0);
+            const [isArtistMode, setIsArtistMode] = useState(false);
+            const [showQR, setShowQR] = useState(false);
+            const [isFullscreen, setIsFullscreen] = useState(false);
+            const [currentPalette, setCurrentPalette] = useState('classic');
+            const [networkUrl, setNetworkUrl] = useState(window.location.href);
+            const [isLoading, setIsLoading] = useState(true);
+            const [loadError, setLoadError] = useState(null);
+            const [currentArtist, setCurrentArtist] = useState(null);
+
+            // --- Book Identity State ---
+            // Front Cover
+            const [bookTitle, setBookTitle] = useState('The Ink Grimoire');
+            const [bookSubtitle, setBookSubtitle] = useState('Fine Line & Geometric');
+            const [coverYear, setCoverYear] = useState('Est. 2025');
+            const [coverLogo, setCoverLogo] = useState(''); // New: cover logo/image
+            const [coverStyle, setCoverStyle] = useState('standard'); // Cover style: standard, mystical, geometric, custom-image
+            const [coverImage, setCoverImage] = useState(''); // Custom cover background image
+
+            // Back Cover
+            const [backTitle, setBackTitle] = useState('Scan to Book');
+            const [artistHandle, setArtistHandle] = useState('@inkgrimoire');
+            const [backDescription, setBackDescription] = useState('Scan the QR code at the stand to save this portfolio to your phone.');
+            const [customQrUrl, setCustomQrUrl] = useState(''); // Custom QR code URL (empty = use current page URL)
+            const [backCoverQrUrl, setBackCoverQrUrl] = useState(''); // QR URL for back cover
+            const [qrStyle, setQrStyle] = useState('standard'); // QR style: standard, rounded, dots
+
+            // --- Transition Effect State ---
+            const [transitionEffect, setTransitionEffect] = useState('flip'); // flip, slide, fade, rise
+
+            // --- Typography State ---
+            // Fonts
+            const [titleFont, setTitleFont] = useState('Cinzel');
+            const [subtitleFont, setSubtitleFont] = useState('IM Fell English');
+            const [yearFont, setYearFont] = useState('Cinzel');
+            const [backTitleFont, setBackTitleFont] = useState('Cinzel');
+            const [handleFont, setHandleFont] = useState('IM Fell English');
+            const [descriptionFont, setDescriptionFont] = useState('IM Fell English');
+            
+            // Colors (null means use palette default)
+            const [titleColor, setTitleColor] = useState(null);
+            const [subtitleColor, setSubtitleColor] = useState(null);
+            const [yearColor, setYearColor] = useState(null);
+            const [backTitleColor, setBackTitleColor] = useState(null);
+            const [handleColor, setHandleColor] = useState(null);
+            const [descriptionColor, setDescriptionColor] = useState(null);
+
+            // Edit State for List Items
+            const [editingPageId, setEditingPageId] = useState(null);
+            const [editCaption, setEditCaption] = useState('');
+
+            // Swipe gesture state
+            const [touchStart, setTouchStart] = useState(null);
+            const [touchEnd, setTouchEnd] = useState(null);
+            const [isFlipping, setIsFlipping] = useState(false);
+            const [flipDirection, setFlipDirection] = useState(null); // 'next' or 'prev'
+            const [isDragging, setIsDragging] = useState(false);
+            const [dragProgress, setDragProgress] = useState(0); // 0 to 1, represents flip progress
+            const [dragStartX, setDragStartX] = useState(null); // Starting X position of drag
+            const [dragOffset, setDragOffset] = useState(0); // Pixel offset from start
+
+            // Get current palette
+            const palette = COLOR_PALETTES[currentPalette];
+
+            // Detect network IP for mobile access
+            useEffect(() => {
+                // Try to get network URL (this will show the full URL including any port)
+                // For live-server, users should access via their local IP
+                const currentUrl = window.location.href;
+                setNetworkUrl(currentUrl);
+            }, []);
+
+            // Real-Time Gesture Engine - Direct Manipulation with Pixel Tracking
+            const minSwipeDistance = 50;
+
+            const onTouchStart = (e) => {
+                if (isArtistMode) return;
+
+                const startX = e.targetTouches[0].clientX;
+                setDragStartX(startX);
+                setTouchStart(startX);
+                setTouchEnd(null);
+                setIsDragging(true);
+                setDragOffset(0);
+                setDragProgress(0);
+                setFlipDirection(null); // Reset direction on new touch
+            };
+
+            const onTouchMove = (e) => {
+                if (!isDragging || !dragStartX || isArtistMode) return;
+
+                const currentX = e.targetTouches[0].clientX;
+                const delta = currentX - dragStartX;
+
+                // Determine intended direction
+                const intendedDirection = delta < 0 ? 'next' : 'prev';
+
+                // Boundary checks - prevent flipping past edges
+                // On first page (cover): can only go 'next' (swipe left)
+                // On last page (back cover): can only go 'prev' (swipe right)
+                if (currentPage === 0 && intendedDirection === 'prev') {
+                    // First page, can't go previous - reset and ignore
+                    setDragProgress(0);
+                    setFlipDirection(null);
+                    return;
+                }
+                if (currentPage === pages.length - 1 && intendedDirection === 'next') {
+                    // Last page, can't go next - reset and ignore
+                    setDragProgress(0);
+                    setFlipDirection(null);
+                    return;
+                }
+
+                setTouchEnd(currentX);
+
+                // Calculate progress (0 to 1)
+                const bookElement = e.currentTarget;
+                const bookWidth = bookElement.offsetWidth;
+                const progress = Math.min(1, Math.abs(delta) / (bookWidth / 2));
+
+                setDragOffset(delta);
+                setDragProgress(progress);
+                setFlipDirection(intendedDirection);
+            };
+
+            const onTouchEnd = () => {
+                if (!isDragging) return;
+
+                const threshold = 0.3; // 30% drag completes the flip
+
+                // If no valid flip direction or not enough progress, just reset immediately
+                if (!flipDirection || dragProgress <= threshold) {
+                    // Snap back - cancel flip (or no flip was initiated)
+                    if (dragProgress > 0) {
+                        setIsFlipping(true);
+                        setTimeout(() => {
+                            setDragProgress(0);
+                            setDragOffset(0);
+                            setIsDragging(false);
+                            setFlipDirection(null);
+                            setIsFlipping(false);
+                            setDragStartX(null);
+                            setTouchStart(null);
+                            setTouchEnd(null);
+                        }, 400); // Shorter for snap-back
+                    } else {
+                        // No drag happened, reset immediately
+                        setIsDragging(false);
+                        setFlipDirection(null);
+                        setDragProgress(0);
+                        setDragOffset(0);
+                        setDragStartX(null);
+                        setTouchStart(null);
+                        setTouchEnd(null);
+                    }
+                    return;
+                }
+
+                // Complete the flip with smooth transition
+                setIsFlipping(true);
+
+                setTimeout(() => {
+                    if (flipDirection === 'next') {
+                        setCurrentPage(prev => Math.min(pages.length - 1, prev + 1));
+                    } else {
+                        setCurrentPage(prev => Math.max(0, prev - 1));
+                    }
+
+                    // Reset all states
+                    setIsFlipping(false);
+                    setIsDragging(false);
+                    setFlipDirection(null);
+                    setDragProgress(0);
+                    setDragOffset(0);
+                    setDragStartX(null);
+                    setTouchStart(null);
+                    setTouchEnd(null);
+                }, 700); // Match the 700ms transition
+            };
+
+            // Click to flip pages
+            const handleBookClick = (e) => {
+                if (isArtistMode) return; // Don't flip in artist mode
+                const rect = e.currentTarget.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const bookWidth = rect.width;
+
+                // Click on right half = next page, left half = previous page
+                if (clickX > bookWidth / 2) {
+                    nextPage();
+                } else {
+                    prevPage();
+                }
+            };
+
+            // Fullscreen toggle for mobile/tablet
+            const toggleFullscreen = async () => {
+                try {
+                    if (!document.fullscreenElement) {
+                        await document.documentElement.requestFullscreen();
+                        setIsFullscreen(true);
+                    } else {
+                        await document.exitFullscreen();
+                        setIsFullscreen(false);
+                    }
+                } catch (err) {
+                    console.log('Fullscreen not supported:', err);
+                }
+            };
+
+            // Listen for fullscreen change events
+            React.useEffect(() => {
+                const handleFullscreenChange = () => {
+                    setIsFullscreen(!!document.fullscreenElement);
+                };
+                document.addEventListener('fullscreenchange', handleFullscreenChange);
+                return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+            }, []);
+
+            // Load portfolio from URL parameter (?artist=handle)
+            React.useEffect(() => {
+                const loadPortfolioFromUrl = async () => {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const artistParam = urlParams.get('artist');
+                    
+                    // Determine which portfolio to load
+                    const portfolioFile = artistParam ? `${artistParam}.json` : 'default.json';
+                    setCurrentArtist(artistParam || 'default');
+                    
+                    try {
+                        const response = await fetch(`./portfolios/${portfolioFile}`);
+                        
+                        if (!response.ok) {
+                            // If specific artist not found, try loading default
+                            if (artistParam) {
+                                console.warn(`Portfolio for "${artistParam}" not found, loading default`);
+                                const defaultResponse = await fetch('./portfolios/default.json');
+                                if (defaultResponse.ok) {
+                                    const data = await defaultResponse.json();
+                                    applyPortfolioData(data);
+                                    setLoadError(`Artist "${artistParam}" not found. Showing demo portfolio.`);
+                                } else {
+                                    throw new Error('Default portfolio not found');
+                                }
+                            } else {
+                                throw new Error('Portfolio not found');
+                            }
+                        } else {
+                            const data = await response.json();
+                            applyPortfolioData(data);
+                        }
+                    } catch (error) {
+                        console.error('Error loading portfolio:', error);
+                        setLoadError('Could not load portfolio. Using built-in demo.');
+                        // Keep the built-in INITIAL_PAGES as fallback
+                    } finally {
+                        setIsLoading(false);
+                    }
+                };
+                
+                // Apply loaded portfolio data to all state variables
+                const applyPortfolioData = (data) => {
+                    if (data.pages) setPages(data.pages);
+                    if (data.bookTitle) setBookTitle(data.bookTitle);
+                    if (data.bookSubtitle) setBookSubtitle(data.bookSubtitle);
+                    if (data.coverYear) setCoverYear(data.coverYear);
+                    if (data.coverStyle) setCoverStyle(data.coverStyle);
+                    if (data.coverImage) setCoverImage(data.coverImage);
+                    if (data.coverLogo) setCoverLogo(data.coverLogo);
+                    if (data.currentPalette) setCurrentPalette(data.currentPalette);
+                    if (data.backTitle) setBackTitle(data.backTitle);
+                    if (data.artistHandle) setArtistHandle(data.artistHandle);
+                    if (data.backDescription) setBackDescription(data.backDescription);
+                    if (data.transitionEffect) setTransitionEffect(data.transitionEffect);
+                    if (data.backCoverQrUrl) setBackCoverQrUrl(data.backCoverQrUrl);
+                    
+                    // Load typography settings
+                    if (data.typography) {
+                        if (data.typography.titleFont) setTitleFont(data.typography.titleFont);
+                        if (data.typography.subtitleFont) setSubtitleFont(data.typography.subtitleFont);
+                        if (data.typography.yearFont) setYearFont(data.typography.yearFont);
+                        if (data.typography.backTitleFont) setBackTitleFont(data.typography.backTitleFont);
+                        if (data.typography.handleFont) setHandleFont(data.typography.handleFont);
+                        if (data.typography.descriptionFont) setDescriptionFont(data.typography.descriptionFont);
+                        setTitleColor(data.typography.titleColor || null);
+                        setSubtitleColor(data.typography.subtitleColor || null);
+                        setYearColor(data.typography.yearColor || null);
+                        setBackTitleColor(data.typography.backTitleColor || null);
+                        setHandleColor(data.typography.handleColor || null);
+                        setDescriptionColor(data.typography.descriptionColor || null);
+                    }
+                };
+                
+                loadPortfolioFromUrl();
+            }, []);
+
+            // --- Handlers ---
+            const nextPage = () => {
+                if (currentPage < pages.length - 1 && !isFlipping) {
+                    setIsFlipping(true);
+                    setFlipDirection('next');
+                    setTimeout(() => {
+                        setCurrentPage(prev => prev + 1);
+                        setIsFlipping(false);
+                        setFlipDirection(null);
+                    }, 700); // Match the 700ms transition
+                }
+            };
+
+            const prevPage = () => {
+                if (currentPage > 0 && !isFlipping) {
+                    setIsFlipping(true);
+                    setFlipDirection('prev');
+                    setTimeout(() => {
+                        setCurrentPage(prev => prev - 1);
+                        setIsFlipping(false);
+                        setFlipDirection(null);
+                    }, 700);
+                }
+            };
+
+            // Save portfolio data
+            const savePortfolio = () => {
+                const portfolioData = {
+                    pages,
+                    bookTitle,
+                    bookSubtitle,
+                    coverYear,
+                    coverStyle,
+                    coverImage,
+                    currentPalette,
+                    backTitle,
+                    artistHandle,
+                    backDescription,
+                    // New settings
+                    transitionEffect,
+                    backCoverQrUrl,
+                    // Typography settings
+                    typography: {
+                        titleFont,
+                        subtitleFont,
+                        yearFont,
+                        backTitleFont,
+                        handleFont,
+                        descriptionFont,
+                        titleColor,
+                        subtitleColor,
+                        yearColor,
+                        backTitleColor,
+                        handleColor,
+                        descriptionColor
+                    }
+                };
+                const dataStr = JSON.stringify(portfolioData, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `${bookTitle.replace(/\s+/g, '_')}_portfolio.json`;
+                link.click();
+                URL.revokeObjectURL(url);
+            };
+
+            // Load portfolio data
+            const loadPortfolio = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        try {
+                            const data = JSON.parse(event.target.result);
+                            setPages(data.pages || INITIAL_PAGES);
+                            setBookTitle(data.bookTitle || 'The Ink Grimoire');
+                            setBookSubtitle(data.bookSubtitle || 'Fine Line & Geometric');
+                            setCoverYear(data.coverYear || 'Est. 2025');
+                            setCoverStyle(data.coverStyle || 'standard');
+                            setCoverImage(data.coverImage || '');
+                            setCurrentPalette(data.currentPalette || 'classic');
+                            setBackTitle(data.backTitle || 'Scan to Book');
+                            setArtistHandle(data.artistHandle || '@inkgrimoire');
+                            setBackDescription(data.backDescription || 'Scan the QR code at the stand to save this portfolio to your phone.');
+                            
+                            // Load new settings
+                            setTransitionEffect(data.transitionEffect || 'flip');
+                            setBackCoverQrUrl(data.backCoverQrUrl || '');
+                            
+                            // Load typography settings
+                            if (data.typography) {
+                                setTitleFont(data.typography.titleFont || 'Cinzel');
+                                setSubtitleFont(data.typography.subtitleFont || 'IM Fell English');
+                                setYearFont(data.typography.yearFont || 'Cinzel');
+                                setBackTitleFont(data.typography.backTitleFont || 'Cinzel');
+                                setHandleFont(data.typography.handleFont || 'IM Fell English');
+                                setDescriptionFont(data.typography.descriptionFont || 'IM Fell English');
+                                setTitleColor(data.typography.titleColor || null);
+                                setSubtitleColor(data.typography.subtitleColor || null);
+                                setYearColor(data.typography.yearColor || null);
+                                setBackTitleColor(data.typography.backTitleColor || null);
+                                setHandleColor(data.typography.handleColor || null);
+                                setDescriptionColor(data.typography.descriptionColor || null);
+                            }
+                            
+                            alert('Portfolio loaded successfully!');
+                        } catch (error) {
+                            alert('Error loading portfolio: ' + error.message);
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+
+            const handleImageUpload = (e) => {
+                const files = Array.from(e.target.files);
+                if (files.length > 0) {
+                    const imageUrls = files.map(file => URL.createObjectURL(file));
+
+                    // Determine layout based on number of images
+                    let layout = 'single';
+                    if (imageUrls.length === 2) layout = 'double-horizontal';
+                    else if (imageUrls.length === 3) layout = 'triple-grid';
+                    else if (imageUrls.length > 3) {
+                        // Only take first 3 images
+                        imageUrls.splice(3);
+                        layout = 'triple-grid';
+                    }
+
+                    const newPage = {
+                        id: Date.now().toString(),
+                        type: 'content',
+                        layout: layout,
+                        images: imageUrls,
+                        caption: 'New Design',
+                        description: 'Description here...'
+                    };
+
+                    const newPages = [...pages];
+                    const insertIndex = Math.max(0, newPages.length - 1);
+                    newPages.splice(insertIndex, 0, newPage);
+                    setPages(newPages);
+                    setCurrentPage(insertIndex - 1);
+                }
+            };
+
+            const handleLogoUpload = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const imageUrl = URL.createObjectURL(file);
+                    setCoverLogo(imageUrl);
+                }
+            };
+
+            const handleCoverImageUpload = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const imageUrl = URL.createObjectURL(file);
+                    setCoverImage(imageUrl);
+                    setCoverStyle('custom-image'); // Automatically switch to custom-image style
+                }
+            };
+
+            const deletePage = (index) => {
+                if (confirm('Are you sure you want to remove this page?')) {
+                    const newPages = pages.filter((_, i) => i !== index);
+                    setPages(newPages);
+                    if (currentPage >= index) setCurrentPage(Math.max(0, currentPage - 1));
+                }
+            };
+
+            const movePage = (index, direction) => {
+                const newPages = [...pages];
+                const contentStartIndex = 1;
+                const contentEndIndex = pages.length - 2;
+
+                if (index < contentStartIndex || index > contentEndIndex) return; 
+
+                const targetIndex = index + direction;
+                if (targetIndex < contentStartIndex || targetIndex > contentEndIndex) return;
+
+                [newPages[index], newPages[targetIndex]] = [newPages[targetIndex], newPages[index]];
+                setPages(newPages);
+            };
+
+            const startEditing = (page) => {
+                setEditingPageId(page.id);
+                setEditCaption(page.caption || '');
+            };
+
+            const saveEditing = (index) => {
+                const newPages = [...pages];
+                newPages[index].caption = editCaption;
+                setPages(newPages);
+                setEditingPageId(null);
+            };
+
+            const changePageLayout = (index, newLayout) => {
+                const newPages = [...pages];
+                newPages[index].layout = newLayout;
+                setPages(newPages);
+            };
+
+            const getZIndex = (index) => {
+                if (index === currentPage) return 50;
+                if (index < currentPage) return index;
+                return pages.length - index;
+            };
+
+            // Show loading screen while fetching portfolio
+            if (isLoading) {
+                return (
+                    <div className="min-h-screen flex flex-col items-center justify-center bg-[#1a1510]">
+                        <div className="animate-pulse">
+                            <Book size={64} className="text-amber-600 mb-4" />
+                        </div>
+                        <p className="text-amber-500 font-cinzel text-lg">Loading portfolio...</p>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="min-h-screen overflow-hidden font-serif flex flex-col items-center justify-center relative perspective-1000"
+                    style={{
+                        backgroundColor: palette.bg,
+                        color: palette.textPrimary
+                    }}>
+
+                    {/* Error Toast */}
+                    {loadError && (
+                        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[200] bg-amber-900/90 text-amber-100 px-4 py-2 rounded-lg shadow-lg backdrop-blur-sm border border-amber-700/50 text-sm">
+                            {loadError}
+                            <button 
+                                onClick={() => setLoadError(null)} 
+                                className="ml-3 text-amber-300 hover:text-white"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Background Texture */}
+                    <div className="absolute inset-0 opacity-40 pointer-events-none"
+                        style={{
+                            backgroundImage: `url("https://www.transparenttextures.com/patterns/wood-pattern.png")`,
+                            backgroundSize: '300px'
+                        }}
+                    />
+                    
+                    {/* Ambient Light/Vignette */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/60 pointer-events-none z-0" />
+
+                    {/* --- Top Bar (Controls) --- */}
+                    <div className="absolute top-4 w-full px-6 flex justify-between items-center z-50">
+                        <div className="flex gap-2 md:gap-4">
+                            <button
+                                onClick={() => setIsArtistMode(!isArtistMode)}
+                                className={`p-2 md:p-3 rounded-full transition-all duration-300 backdrop-blur-md border border-white/10 ${isArtistMode ? 'bg-amber-600 text-white shadow-[0_0_15px_rgba(217,119,6,0.5)]' : 'bg-black/30 text-amber-100 hover:bg-black/50'}`}
+                                title="Artist Mode"
+                            >
+                                <Settings size={18} className="md:w-5 md:h-5" />
+                            </button>
+                            {isArtistMode && (
+                                <>
+                                    <button
+                                        onClick={savePortfolio}
+                                        className="p-2 md:p-3 rounded-full bg-green-700/80 hover:bg-green-600 text-white backdrop-blur-md border border-white/10 transition-all"
+                                        title="Save Portfolio"
+                                    >
+                                        <Save size={18} className="md:w-5 md:h-5" />
+                                    </button>
+                                    <label className="p-2 md:p-3 rounded-full bg-blue-700/80 hover:bg-blue-600 text-white backdrop-blur-md border border-white/10 transition-all cursor-pointer" title="Load Portfolio">
+                                        <input type="file" accept=".json" onChange={loadPortfolio} className="hidden" />
+                                        <Upload size={18} className="md:w-5 md:h-5" />
+                                    </label>
+                                </>
+                            )}
+                        </div>
+
+                        {/* Fullscreen button - mobile/tablet only */}
+                        <button
+                            onClick={toggleFullscreen}
+                            className="md:hidden p-2 rounded-full bg-black/30 text-amber-100 hover:bg-black/50 backdrop-blur-md border border-white/10 transition-all"
+                            title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                        >
+                            {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+                        </button>
+
+                        <button 
+                            onClick={() => setShowQR(true)}
+                            className="flex items-center gap-2 px-4 py-2 bg-amber-700/80 hover:bg-amber-600 text-amber-50 rounded-lg backdrop-blur-sm transition-colors border border-amber-500/30 shadow-lg shadow-black/50 group"
+                        >
+                            <QrCode size={18} className="group-hover:scale-110 transition-transform"/>
+                            <span className="font-cinzel text-sm">Stand QR</span>
+                        </button>
+                    </div>
+
+                    {/* --- The Book --- */}
+                    <div
+                        className="relative w-[95vw] h-[75vh] md:w-[500px] md:h-[700px] transition-transform duration-500 ease-in-out z-10 cursor-pointer"
+                        onTouchStart={onTouchStart}
+                        onTouchMove={onTouchMove}
+                        onTouchEnd={onTouchEnd}
+                        onClick={handleBookClick}
+                    >
+                        {/* Book Spine/Border */}
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[104%] h-[104%] bg-[#2a1d15] rounded-lg shadow-2xl shadow-black border-4 border-[#3e2b20]" />
+
+                        {/* Pages Container - Dynamic Transition Effects */}
+                        <div className="relative w-full h-full" style={{ perspective: transitionEffect === 'flip' ? '1200px' : 'none', perspectiveOrigin: '50% 50%' }}>
+                            {pages.map((page, index) => {
+                                const isVisible = index === currentPage;
+                                const isPrev = index < currentPage;
+                                const isNext = index > currentPage;
+                                const isNextPage = index === currentPage + 1;
+                                const isPrevPage = index === currentPage - 1;
+                                const isCurrentlyFlipping = isFlipping && (
+                                    (flipDirection === 'next' && index === currentPage) ||
+                                    (flipDirection === 'prev' && index === currentPage - 1)
+                                );
+
+                                let transform = '';
+                                let zIndex = 10;
+                                let opacity = 0;
+                                let origin = 'center center';
+                                let shadowOpacity = 0;
+                                let animationClass = '';
+
+                                // === FLIP EFFECT ===
+                                if (transitionEffect === 'flip') {
+                                    origin = 'left center';
+                                    
+                                    if (isDragging && flipDirection) {
+                                        const angle = dragProgress * 180;
+                                        const liftCurve = Math.sin(dragProgress * Math.PI);
+                                        const lift = liftCurve * 35;
+                                        const zMove = liftCurve * 40;
+
+                                        if (flipDirection === 'next' && index === currentPage) {
+                                            transform = `translateY(${-lift}px) translateZ(${zMove}px) rotateY(${-angle}deg)`;
+                                            opacity = 1;
+                                            zIndex = 30;
+                                            shadowOpacity = liftCurve * 0.3;
+                                        } else if (flipDirection === 'next' && isNextPage) {
+                                            transform = 'rotateY(0deg)';
+                                            opacity = 1;
+                                            zIndex = 20;
+                                        } else if (flipDirection === 'prev' && isPrevPage) {
+                                            const reverseAngle = 180 - angle;
+                                            transform = `translateY(${-lift}px) translateZ(${zMove}px) rotateY(${-reverseAngle}deg)`;
+                                            opacity = 1;
+                                            zIndex = 30;
+                                            shadowOpacity = liftCurve * 0.3;
+                                        } else if (flipDirection === 'prev' && isVisible) {
+                                            transform = 'rotateY(0deg)';
+                                            opacity = 1;
+                                            zIndex = 20;
+                                        } else if (isPrev) {
+                                            transform = 'rotateY(-180deg)';
+                                            opacity = 0;
+                                        } else if (isNext) {
+                                            transform = 'rotateY(0deg)';
+                                            opacity = 0;
+                                        }
+                                    } else if (isVisible && !isFlipping) {
+                                        transform = 'rotateY(0deg)';
+                                        zIndex = 20;
+                                        opacity = 1;
+                                    } else if (isCurrentlyFlipping && flipDirection === 'next' && index === currentPage) {
+                                        animationClass = 'flip-next-animation';
+                                        zIndex = 30;
+                                        opacity = 1;
+                                    } else if (isFlipping && flipDirection === 'next' && isNextPage) {
+                                        transform = 'rotateY(0deg)';
+                                        opacity = 1;
+                                        zIndex = 20;
+                                    } else if (isCurrentlyFlipping && flipDirection === 'prev' && isPrevPage) {
+                                        animationClass = 'flip-prev-animation';
+                                        zIndex = 30;
+                                        opacity = 1;
+                                    } else if (isFlipping && flipDirection === 'prev' && isVisible) {
+                                        transform = 'rotateY(0deg)';
+                                        opacity = 1;
+                                        zIndex = 20;
+                                    } else if (isPrev && !isFlipping) {
+                                        transform = 'rotateY(-180deg)';
+                                        opacity = 0;
+                                    } else if (isNext && !isFlipping) {
+                                        transform = 'rotateY(0deg)';
+                                        opacity = 0;
+                                    }
+                                }
+                                
+                                // === SLIDE EFFECT ===
+                                else if (transitionEffect === 'slide') {
+                                    if (isDragging && flipDirection) {
+                                        const slideAmount = dragProgress * 100;
+                                        if (flipDirection === 'next' && index === currentPage) {
+                                            transform = `translateX(${-slideAmount}%)`;
+                                            opacity = 1 - dragProgress;
+                                            zIndex = 30;
+                                        } else if (flipDirection === 'next' && isNextPage) {
+                                            transform = `translateX(${100 - slideAmount}%)`;
+                                            opacity = dragProgress;
+                                            zIndex = 20;
+                                        } else if (flipDirection === 'prev' && isPrevPage) {
+                                            transform = `translateX(${-100 + slideAmount}%)`;
+                                            opacity = dragProgress;
+                                            zIndex = 20;
+                                        } else if (flipDirection === 'prev' && isVisible) {
+                                            transform = `translateX(${slideAmount}%)`;
+                                            opacity = 1 - dragProgress;
+                                            zIndex = 30;
+                                        } else {
+                                            opacity = 0;
+                                        }
+                                    } else if (isVisible && !isFlipping) {
+                                        transform = 'translateX(0)';
+                                        zIndex = 20;
+                                        opacity = 1;
+                                    } else if (isCurrentlyFlipping && flipDirection === 'next' && index === currentPage) {
+                                        animationClass = 'slide-next-out';
+                                        zIndex = 30;
+                                        opacity = 1;
+                                    } else if (isFlipping && flipDirection === 'next' && isNextPage) {
+                                        animationClass = 'slide-next-in';
+                                        zIndex = 20;
+                                        opacity = 1;
+                                    } else if (isCurrentlyFlipping && flipDirection === 'prev' && isPrevPage) {
+                                        animationClass = 'slide-prev-in';
+                                        zIndex = 20;
+                                        opacity = 1;
+                                    } else if (isFlipping && flipDirection === 'prev' && isVisible) {
+                                        animationClass = 'slide-prev-out';
+                                        zIndex = 30;
+                                        opacity = 1;
+                                    } else {
+                                        opacity = 0;
+                                    }
+                                }
+                                
+                                // === FADE EFFECT ===
+                                else if (transitionEffect === 'fade') {
+                                    if (isDragging && flipDirection) {
+                                        if (flipDirection === 'next' && index === currentPage) {
+                                            opacity = 1 - dragProgress;
+                                            zIndex = 30;
+                                        } else if (flipDirection === 'next' && isNextPage) {
+                                            opacity = dragProgress;
+                                            zIndex = 20;
+                                        } else if (flipDirection === 'prev' && isPrevPage) {
+                                            opacity = dragProgress;
+                                            zIndex = 20;
+                                        } else if (flipDirection === 'prev' && isVisible) {
+                                            opacity = 1 - dragProgress;
+                                            zIndex = 30;
+                                        } else {
+                                            opacity = 0;
+                                        }
+                                    } else if (isVisible && !isFlipping) {
+                                        zIndex = 20;
+                                        opacity = 1;
+                                    } else if (isCurrentlyFlipping && flipDirection === 'next' && index === currentPage) {
+                                        animationClass = 'fade-out';
+                                        zIndex = 30;
+                                        opacity = 1;
+                                    } else if (isFlipping && flipDirection === 'next' && isNextPage) {
+                                        animationClass = 'fade-in';
+                                        zIndex = 20;
+                                        opacity = 1;
+                                    } else if (isCurrentlyFlipping && flipDirection === 'prev' && isPrevPage) {
+                                        animationClass = 'fade-in';
+                                        zIndex = 20;
+                                        opacity = 1;
+                                    } else if (isFlipping && flipDirection === 'prev' && isVisible) {
+                                        animationClass = 'fade-out';
+                                        zIndex = 30;
+                                        opacity = 1;
+                                    } else {
+                                        opacity = 0;
+                                    }
+                                }
+                                
+                                // === RISE (VERTICAL) EFFECT ===
+                                else if (transitionEffect === 'rise') {
+                                    if (isDragging && flipDirection) {
+                                        const riseAmount = dragProgress * 50;
+                                        const scale = 1 - (dragProgress * 0.05);
+                                        if (flipDirection === 'next' && index === currentPage) {
+                                            transform = `translateY(${-riseAmount}px) scale(${scale})`;
+                                            opacity = 1 - dragProgress;
+                                            zIndex = 30;
+                                        } else if (flipDirection === 'next' && isNextPage) {
+                                            transform = `translateY(${50 - riseAmount}px) scale(${0.95 + dragProgress * 0.05})`;
+                                            opacity = dragProgress;
+                                            zIndex = 20;
+                                        } else if (flipDirection === 'prev' && isPrevPage) {
+                                            transform = `translateY(${-50 + riseAmount}px) scale(${0.95 + dragProgress * 0.05})`;
+                                            opacity = dragProgress;
+                                            zIndex = 20;
+                                        } else if (flipDirection === 'prev' && isVisible) {
+                                            transform = `translateY(${riseAmount}px) scale(${scale})`;
+                                            opacity = 1 - dragProgress;
+                                            zIndex = 30;
+                                        } else {
+                                            opacity = 0;
+                                        }
+                                    } else if (isVisible && !isFlipping) {
+                                        transform = 'translateY(0) scale(1)';
+                                        zIndex = 20;
+                                        opacity = 1;
+                                    } else if (isCurrentlyFlipping && flipDirection === 'next' && index === currentPage) {
+                                        animationClass = 'rise-next-out';
+                                        zIndex = 30;
+                                        opacity = 1;
+                                    } else if (isFlipping && flipDirection === 'next' && isNextPage) {
+                                        animationClass = 'rise-next-in';
+                                        zIndex = 20;
+                                        opacity = 1;
+                                    } else if (isCurrentlyFlipping && flipDirection === 'prev' && isPrevPage) {
+                                        animationClass = 'rise-prev-in';
+                                        zIndex = 20;
+                                        opacity = 1;
+                                    } else if (isFlipping && flipDirection === 'prev' && isVisible) {
+                                        animationClass = 'rise-prev-out';
+                                        zIndex = 30;
+                                        opacity = 1;
+                                    } else {
+                                        opacity = 0;
+                                    }
+                                }
+
+                                return (
+                                    <div
+                                        key={page.id}
+                                        className={`absolute inset-0 ${transitionEffect === 'flip' ? 'transform-style-3d backface-hidden' : ''} ${animationClass}`}
+                                        style={{
+                                            transform: animationClass ? undefined : transform,
+                                            transformOrigin: origin,
+                                            zIndex,
+                                            opacity: animationClass ? undefined : opacity,
+                                            pointerEvents: opacity === 0 && !animationClass ? 'none' : 'auto',
+                                            transition: (isDragging || animationClass) ? 'none' : 'transform 0.5s ease-out, opacity 0.5s ease-out'
+                                        }}
+                                    >
+                                        {/* Dynamic shadow overlay - darkens as page lifts */}
+                                        <div
+                                            className="absolute inset-0 bg-black pointer-events-none"
+                                            style={{
+                                                opacity: shadowOpacity,
+                                                mixBlendMode: 'multiply',
+                                                transition: isDragging ? 'none' : 'opacity 0.5s ease-out'
+                                            }}
+                                        />
+
+                                        <div
+                                            className="w-full h-full shadow-md flex overflow-hidden backface-hidden"
+                                            style={{
+                                                backgroundColor: palette.pageFront,
+                                                borderColor: `${palette.textSecondary}40`,
+                                                backgroundImage: page.type === 'cover' && coverStyle !== 'standard' ? 'none' : `url("https://www.transparenttextures.com/patterns/cream-paper.png")`,
+                                                borderRadius: '12px'
+                                            }}
+                                        >
+                                            <PageContent
+                                                page={page}
+                                                bookTitle={bookTitle}
+                                                bookSubtitle={bookSubtitle}
+                                                coverYear={coverYear}
+                                                coverLogo={coverLogo}
+                                                coverStyle={coverStyle}
+                                                coverImage={coverImage}
+                                                backTitle={backTitle}
+                                                backDescription={backDescription}
+                                                artistHandle={artistHandle}
+                                                backCoverQrUrl={backCoverQrUrl}
+                                                palette={palette}
+                                                typography={{
+                                                    titleFont: FONT_OPTIONS.find(f => f.value === titleFont)?.style || "'Cinzel', serif",
+                                                    subtitleFont: FONT_OPTIONS.find(f => f.value === subtitleFont)?.style || "'IM Fell English', serif",
+                                                    yearFont: FONT_OPTIONS.find(f => f.value === yearFont)?.style || "'Cinzel', serif",
+                                                    backTitleFont: FONT_OPTIONS.find(f => f.value === backTitleFont)?.style || "'Cinzel', serif",
+                                                    handleFont: FONT_OPTIONS.find(f => f.value === handleFont)?.style || "'IM Fell English', serif",
+                                                    descriptionFont: FONT_OPTIONS.find(f => f.value === descriptionFont)?.style || "'IM Fell English', serif",
+                                                    titleColor,
+                                                    subtitleColor,
+                                                    yearColor,
+                                                    backTitleColor,
+                                                    handleColor,
+                                                    descriptionColor
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* --- Navigation Controls (Bottom) --- */}
+                    <div className="absolute bottom-8 flex gap-8 z-50">
+                        <button onClick={prevPage} disabled={currentPage === 0} className="p-4 rounded-full bg-amber-950/80 text-amber-100 hover:bg-amber-900 disabled:opacity-30 disabled:cursor-not-allowed backdrop-blur-sm border border-amber-800 transition-all shadow-lg"><ChevronLeft /></button>
+                        <div className="flex items-center gap-2 px-4 py-2 bg-black/40 rounded-full backdrop-blur-md text-amber-500/60 font-mono text-xs">
+                            <span>{currentPage + 1}</span><span>/</span><span>{pages.length}</span>
+                        </div>
+                        <button onClick={nextPage} disabled={currentPage === pages.length - 1} className="p-4 rounded-full bg-amber-950/80 text-amber-100 hover:bg-amber-900 disabled:opacity-30 disabled:cursor-not-allowed backdrop-blur-sm border border-amber-800 transition-all shadow-lg"><ChevronRight /></button>
+                    </div>
+
+                    {/* --- Artist Mode Sidebar --- */}
+                    {isArtistMode && (
+                        <div className="absolute left-6 top-20 bottom-24 w-80 bg-[#1a1510]/95 backdrop-blur-xl border border-amber-900/30 p-4 transform transition-transform overflow-y-auto z-50 rounded-xl shadow-2xl">
+                            <div className="sticky top-0 bg-[#1a1510]/95 pb-4 z-10 border-b border-amber-900/30 mb-4">
+                                <h3 className="text-amber-500 font-cinzel text-lg flex items-center gap-2">
+                                    <Settings size={18} /> Artist Studio
+                                </h3>
+                            </div>
+
+                            {/* Color Palette Selector */}
+                            <div className="mb-6 p-3 rounded bg-black/20 border border-amber-900/20">
+                                <h4 className="text-[10px] font-bold text-amber-600 uppercase tracking-widest mb-3 border-b border-amber-900/20 pb-1">Color Theme</h4>
+                                <div className="grid grid-cols-1 gap-2">
+                                    {Object.entries(COLOR_PALETTES).map(([key, pal]) => (
+                                        <button
+                                            key={key}
+                                            onClick={() => setCurrentPalette(key)}
+                                            className={`p-2 rounded border text-left transition-all ${
+                                                currentPalette === key
+                                                    ? 'border-amber-500 bg-amber-900/40'
+                                                    : 'border-amber-900/20 bg-black/20 hover:bg-amber-900/20'
+                                            }`}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <div
+                                                    className="w-6 h-6 rounded border border-white/20"
+                                                    style={{ backgroundColor: pal.pageFront }}
+                                                />
+                                                <span className="text-xs text-amber-200">{pal.name}</span>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Page Transition Effect */}
+                            <div className="mb-6 p-3 rounded bg-black/20 border border-amber-900/20">
+                                <h4 className="text-[10px] font-bold text-amber-600 uppercase tracking-widest mb-3 border-b border-amber-900/20 pb-1">Page Transition</h4>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {TRANSITION_EFFECTS.map((effect) => (
+                                        <button
+                                            key={effect.value}
+                                            onClick={() => setTransitionEffect(effect.value)}
+                                            className={`p-2 rounded border text-center transition-all ${
+                                                transitionEffect === effect.value
+                                                    ? 'border-amber-500 bg-amber-900/40'
+                                                    : 'border-amber-900/20 bg-black/20 hover:bg-amber-900/20'
+                                            }`}
+                                        >
+                                            <span className="text-xs text-amber-200">{effect.label}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Front Cover Settings */}
+                            <div className="mb-6 p-3 rounded bg-black/20 border border-amber-900/20">
+                                <h4 className="text-[10px] font-bold text-amber-600 uppercase tracking-widest mb-3 border-b border-amber-900/20 pb-1">Front Cover</h4>
+                                <div className="space-y-3">
+                                    <div>
+                                        <label className="text-[10px] text-amber-700 block mb-1">Book Title</label>
+                                        <input value={bookTitle} onChange={(e) => setBookTitle(e.target.value)} className="w-full bg-black/40 border border-amber-900/30 rounded p-1.5 text-amber-100 text-sm focus:border-amber-500 focus:outline-none placeholder-amber-900/30" />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] text-amber-700 block mb-1">Subtitle</label>
+                                        <input value={bookSubtitle} onChange={(e) => setBookSubtitle(e.target.value)} className="w-full bg-black/40 border border-amber-900/30 rounded p-1.5 text-amber-100 text-sm focus:border-amber-500 focus:outline-none placeholder-amber-900/30" />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] text-amber-700 block mb-1">Est. Year</label>
+                                        <input value={coverYear} onChange={(e) => setCoverYear(e.target.value)} className="w-full bg-black/40 border border-amber-900/30 rounded p-1.5 text-amber-100 text-sm focus:border-amber-500 focus:outline-none placeholder-amber-900/30" />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] text-amber-700 block mb-2">Cover Style</label>
+                                        <div className="space-y-2 mb-3">
+                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="radio"
+                                                    name="coverStyle"
+                                                    value="standard"
+                                                    checked={coverStyle === 'standard'}
+                                                    onChange={(e) => setCoverStyle(e.target.value)}
+                                                    className="w-4 h-4"
+                                                />
+                                                <span className="text-[10px] text-amber-200">Standard Cover</span>
+                                            </label>
+                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="radio"
+                                                    name="coverStyle"
+                                                    value="custom-image"
+                                                    checked={coverStyle === 'custom-image'}
+                                                    onChange={(e) => setCoverStyle(e.target.value)}
+                                                    className="w-4 h-4"
+                                                />
+                                                <span className="text-[10px] text-amber-200">Custom Image Cover</span>
+                                            </label>
+                                            {/* Placeholder for future cover templates */}
+                                            <div className="mt-3 p-2 border border-dashed border-amber-900/30 rounded bg-black/10">
+                                                <span className="text-[9px] text-amber-700 block mb-1">📚 Cover Templates</span>
+                                                <span className="text-[8px] text-amber-800/60 italic">Coming soon: Pre-designed book cover templates</span>
+                                            </div>
+                                        </div>
+                                        {coverStyle === 'standard' && (
+                                            <>
+                                                <label className="text-[10px] text-amber-700 block mb-2 mt-3">Logo/Image (Optional)</label>
+                                                <label className="block w-full p-2 border border-dashed border-amber-800/40 rounded hover:border-amber-600 hover:bg-amber-900/10 cursor-pointer transition-colors text-center bg-black/20">
+                                                    <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                                                    {coverLogo ? (
+                                                        <div className="flex items-center gap-2">
+                                                            <img src={coverLogo} alt="Logo preview" className="w-8 h-8 object-contain rounded" />
+                                                            <span className="text-[10px] text-amber-500">Change Logo</span>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-[10px] text-amber-700">Upload Logo</span>
+                                                    )}
+                                                </label>
+                                                {coverLogo && (
+                                                    <button onClick={() => setCoverLogo('')} className="mt-1 text-[9px] text-red-500 hover:text-red-400">Remove Logo</button>
+                                                )}
+                                            </>
+                                        )}
+                                        {coverStyle === 'custom-image' && (
+                                            <>
+                                                <label className="text-[10px] text-amber-700 block mb-2 mt-3">Cover Background Image</label>
+                                                <label className="block w-full p-2 border border-dashed border-amber-800/40 rounded hover:border-amber-600 hover:bg-amber-900/10 cursor-pointer transition-colors text-center bg-black/20">
+                                                    <input type="file" accept="image/*" onChange={handleCoverImageUpload} className="hidden" />
+                                                    {coverImage ? (
+                                                        <div className="flex flex-col items-center gap-2">
+                                                            <img src={coverImage} alt="Cover preview" className="w-full h-20 object-cover rounded" />
+                                                            <span className="text-[10px] text-amber-500">Change Cover Image</span>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-[10px] text-amber-700">Upload Cover Image</span>
+                                                    )}
+                                                </label>
+                                                {coverImage && (
+                                                    <button onClick={() => setCoverImage('')} className="mt-1 text-[9px] text-red-500 hover:text-red-400">Remove Cover Image</button>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Back Cover Settings */}
+                            <div className="mb-6 p-3 rounded bg-black/20 border border-amber-900/20">
+                                <h4 className="text-[10px] font-bold text-amber-600 uppercase tracking-widest mb-3 border-b border-amber-900/20 pb-1">Back Cover</h4>
+                                <div className="space-y-3">
+                                    <div>
+                                        <label className="text-[10px] text-amber-700 block mb-1">Page Title</label>
+                                        <input value={backTitle} onChange={(e) => setBackTitle(e.target.value)} className="w-full bg-black/40 border border-amber-900/30 rounded p-1.5 text-amber-100 text-sm focus:border-amber-500 focus:outline-none placeholder-amber-900/30" />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] text-amber-700 block mb-1">Instagram Handle</label>
+                                        <input value={artistHandle} onChange={(e) => setArtistHandle(e.target.value)} className="w-full bg-black/40 border border-amber-900/30 rounded p-1.5 text-amber-100 text-sm focus:border-amber-500 focus:outline-none placeholder-amber-900/30" />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] text-amber-700 block mb-1">Description</label>
+                                        <textarea value={backDescription} onChange={(e) => setBackDescription(e.target.value)} rows="3" className="w-full bg-black/40 border border-amber-900/30 rounded p-1.5 text-amber-100 text-xs focus:border-amber-500 focus:outline-none placeholder-amber-900/30 resize-none"></textarea>
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] text-amber-700 block mb-1">QR Code URL</label>
+                                        <input 
+                                            value={backCoverQrUrl} 
+                                            onChange={(e) => setBackCoverQrUrl(e.target.value)} 
+                                            placeholder="https://instagram.com/yourhandle"
+                                            className="w-full bg-black/40 border border-amber-900/30 rounded p-1.5 text-amber-100 text-sm focus:border-amber-500 focus:outline-none placeholder-amber-900/30" 
+                                        />
+                                        <span className="text-[8px] text-amber-800 mt-1 block">Leave empty to use Instagram handle</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Typography Settings */}
+                            <div className="mb-6 p-3 rounded bg-black/20 border border-amber-900/20">
+                                <h4 className="text-[10px] font-bold text-amber-600 uppercase tracking-widest mb-3 border-b border-amber-900/20 pb-1">Typography</h4>
+                                
+                                {/* Front Cover Typography */}
+                                <div className="mb-4">
+                                    <h5 className="text-[9px] font-bold text-amber-500 uppercase tracking-wider mb-2">Front Cover</h5>
+                                    <div className="space-y-2">
+                                        {/* Title Font & Color */}
+                                        <div className="flex gap-2">
+                                            <div className="flex-1">
+                                                <label className="text-[9px] text-amber-700 block mb-1">Title Font</label>
+                                                <select value={titleFont} onChange={(e) => setTitleFont(e.target.value)} className="w-full bg-black/40 border border-amber-900/30 rounded p-1 text-[10px] text-amber-100 focus:border-amber-500 focus:outline-none">
+                                                    {FONT_OPTIONS.map(font => (
+                                                        <option key={font.value} value={font.value} style={{ fontFamily: font.style }}>{font.label}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div className="w-16">
+                                                <label className="text-[9px] text-amber-700 block mb-1">Color</label>
+                                                <div className="flex gap-1">
+                                                    <input type="color" value={titleColor || palette.textPrimary} onChange={(e) => setTitleColor(e.target.value)} className="w-8 h-6 bg-transparent border border-amber-900/30 rounded cursor-pointer" />
+                                                    {titleColor && <button onClick={() => setTitleColor(null)} className="text-[8px] text-amber-700 hover:text-amber-500">↺</button>}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Subtitle Font & Color */}
+                                        <div className="flex gap-2">
+                                            <div className="flex-1">
+                                                <label className="text-[9px] text-amber-700 block mb-1">Subtitle Font</label>
+                                                <select value={subtitleFont} onChange={(e) => setSubtitleFont(e.target.value)} className="w-full bg-black/40 border border-amber-900/30 rounded p-1 text-[10px] text-amber-100 focus:border-amber-500 focus:outline-none">
+                                                    {FONT_OPTIONS.map(font => (
+                                                        <option key={font.value} value={font.value} style={{ fontFamily: font.style }}>{font.label}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div className="w-16">
+                                                <label className="text-[9px] text-amber-700 block mb-1">Color</label>
+                                                <div className="flex gap-1">
+                                                    <input type="color" value={subtitleColor || palette.textSecondary} onChange={(e) => setSubtitleColor(e.target.value)} className="w-8 h-6 bg-transparent border border-amber-900/30 rounded cursor-pointer" />
+                                                    {subtitleColor && <button onClick={() => setSubtitleColor(null)} className="text-[8px] text-amber-700 hover:text-amber-500">↺</button>}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Year Font & Color */}
+                                        <div className="flex gap-2">
+                                            <div className="flex-1">
+                                                <label className="text-[9px] text-amber-700 block mb-1">Year Font</label>
+                                                <select value={yearFont} onChange={(e) => setYearFont(e.target.value)} className="w-full bg-black/40 border border-amber-900/30 rounded p-1 text-[10px] text-amber-100 focus:border-amber-500 focus:outline-none">
+                                                    {FONT_OPTIONS.map(font => (
+                                                        <option key={font.value} value={font.value} style={{ fontFamily: font.style }}>{font.label}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div className="w-16">
+                                                <label className="text-[9px] text-amber-700 block mb-1">Color</label>
+                                                <div className="flex gap-1">
+                                                    <input type="color" value={yearColor || palette.textSecondary} onChange={(e) => setYearColor(e.target.value)} className="w-8 h-6 bg-transparent border border-amber-900/30 rounded cursor-pointer" />
+                                                    {yearColor && <button onClick={() => setYearColor(null)} className="text-[8px] text-amber-700 hover:text-amber-500">↺</button>}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {/* Back Cover Typography */}
+                                <div>
+                                    <h5 className="text-[9px] font-bold text-amber-500 uppercase tracking-wider mb-2 pt-2 border-t border-amber-900/20">Back Cover</h5>
+                                    <div className="space-y-2">
+                                        {/* Back Title Font & Color */}
+                                        <div className="flex gap-2">
+                                            <div className="flex-1">
+                                                <label className="text-[9px] text-amber-700 block mb-1">Title Font</label>
+                                                <select value={backTitleFont} onChange={(e) => setBackTitleFont(e.target.value)} className="w-full bg-black/40 border border-amber-900/30 rounded p-1 text-[10px] text-amber-100 focus:border-amber-500 focus:outline-none">
+                                                    {FONT_OPTIONS.map(font => (
+                                                        <option key={font.value} value={font.value} style={{ fontFamily: font.style }}>{font.label}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div className="w-16">
+                                                <label className="text-[9px] text-amber-700 block mb-1">Color</label>
+                                                <div className="flex gap-1">
+                                                    <input type="color" value={backTitleColor || palette.textPrimary} onChange={(e) => setBackTitleColor(e.target.value)} className="w-8 h-6 bg-transparent border border-amber-900/30 rounded cursor-pointer" />
+                                                    {backTitleColor && <button onClick={() => setBackTitleColor(null)} className="text-[8px] text-amber-700 hover:text-amber-500">↺</button>}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Handle Font & Color */}
+                                        <div className="flex gap-2">
+                                            <div className="flex-1">
+                                                <label className="text-[9px] text-amber-700 block mb-1">Handle Font</label>
+                                                <select value={handleFont} onChange={(e) => setHandleFont(e.target.value)} className="w-full bg-black/40 border border-amber-900/30 rounded p-1 text-[10px] text-amber-100 focus:border-amber-500 focus:outline-none">
+                                                    {FONT_OPTIONS.map(font => (
+                                                        <option key={font.value} value={font.value} style={{ fontFamily: font.style }}>{font.label}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div className="w-16">
+                                                <label className="text-[9px] text-amber-700 block mb-1">Color</label>
+                                                <div className="flex gap-1">
+                                                    <input type="color" value={handleColor || palette.textSecondary} onChange={(e) => setHandleColor(e.target.value)} className="w-8 h-6 bg-transparent border border-amber-900/30 rounded cursor-pointer" />
+                                                    {handleColor && <button onClick={() => setHandleColor(null)} className="text-[8px] text-amber-700 hover:text-amber-500">↺</button>}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Description Font & Color */}
+                                        <div className="flex gap-2">
+                                            <div className="flex-1">
+                                                <label className="text-[9px] text-amber-700 block mb-1">Description Font</label>
+                                                <select value={descriptionFont} onChange={(e) => setDescriptionFont(e.target.value)} className="w-full bg-black/40 border border-amber-900/30 rounded p-1 text-[10px] text-amber-100 focus:border-amber-500 focus:outline-none">
+                                                    {FONT_OPTIONS.map(font => (
+                                                        <option key={font.value} value={font.value} style={{ fontFamily: font.style }}>{font.label}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div className="w-16">
+                                                <label className="text-[9px] text-amber-700 block mb-1">Color</label>
+                                                <div className="flex gap-1">
+                                                    <input type="color" value={descriptionColor || palette.textSecondary} onChange={(e) => setDescriptionColor(e.target.value)} className="w-8 h-6 bg-transparent border border-amber-900/30 rounded cursor-pointer" />
+                                                    {descriptionColor && <button onClick={() => setDescriptionColor(null)} className="text-[8px] text-amber-700 hover:text-amber-500">↺</button>}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Upload */}
+                            <div className="mb-6">
+                                <label className="block w-full p-4 border-2 border-dashed border-amber-800/40 rounded-lg hover:border-amber-600 hover:bg-amber-900/20 cursor-pointer transition-colors text-center group bg-black/20">
+                                    <input type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" />
+                                    <Upload className="mx-auto text-amber-700 group-hover:text-amber-500 mb-2" />
+                                    <span className="text-xs text-amber-700 group-hover:text-amber-500 block">Add New Page</span>
+                                    <span className="text-[9px] text-amber-800 block mt-1">Select 1-3 images</span>
+                                </label>
+                            </div>
+
+                            {/* Page List */}
+                            <div className="space-y-2">
+                                <h4 className="text-xs font-bold text-amber-700/80 uppercase tracking-wider mb-2">Page Layout</h4>
+                                {pages.map((p, i) => (
+                                    <div key={p.id} className={`flex flex-col p-2 rounded border border-transparent ${i === currentPage ? 'bg-amber-900/30 border-amber-800/50' : 'hover:bg-white/5'}`}>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <div className="flex items-center gap-2 overflow-hidden">
+                                                <span className="text-[10px] font-mono text-amber-800 w-4">{i}</span>
+                                                {editingPageId === p.id ? (
+                                                    <input value={editCaption} onChange={(e) => setEditCaption(e.target.value)} className="bg-black/40 text-amber-100 text-xs rounded px-1 w-24 border border-amber-600 focus:outline-none" autoFocus />
+                                                ) : (
+                                                    <span className="text-amber-200 text-xs truncate max-w-[100px]">{p.title || p.caption || (p.type === 'cover' ? 'Front Cover' : 'Back Cover')}</span>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                {p.type === 'content' && (
+                                                    editingPageId === p.id ?
+                                                    <button onClick={() => saveEditing(i)} className="text-green-500 hover:text-green-400 p-1"><Save size={12} /></button> :
+                                                    <button onClick={() => startEditing(p)} className="text-amber-700 hover:text-amber-500 p-1"><Edit2 size={12} /></button>
+                                                )}
+                                                {p.type === 'cover' && (
+                                                    <button onClick={() => setCurrentPage(i)} className="text-amber-700 hover:text-amber-500 p-1" title="Jump to Front Cover"><Edit2 size={12} /></button>
+                                                )}
+                                                {p.type === 'back-cover' && (
+                                                    <button onClick={() => setCurrentPage(i)} className="text-amber-700 hover:text-amber-500 p-1" title="Jump to Back Cover"><Edit2 size={12} /></button>
+                                                )}
+                                                <button onClick={() => movePage(i, -1)} disabled={i <= 1 || i === pages.length - 1} className="text-amber-700 hover:text-amber-400 disabled:opacity-20 p-1"><ArrowUp size={12} /></button>
+                                                <button onClick={() => movePage(i, 1)} disabled={i === 0 || i >= pages.length - 2} className="text-amber-700 hover:text-amber-400 disabled:opacity-20 p-1"><ArrowDown size={12} /></button>
+                                                {p.type === 'content' && <button onClick={() => deletePage(i)} className="text-red-900 hover:text-red-500 p-1 ml-1"><Trash2 size={12} /></button>}
+                                            </div>
+                                        </div>
+
+                                        {/* Layout selector for content pages */}
+                                        {p.type === 'content' && (p.images || p.image) && (
+                                            <div className="mt-2 pt-2 border-t border-amber-900/20">
+                                                <label className="text-[9px] text-amber-700 block mb-1">Layout:</label>
+                                                <select
+                                                    value={p.layout || 'single'}
+                                                    onChange={(e) => changePageLayout(i, e.target.value)}
+                                                    className="w-full bg-black/40 border border-amber-900/30 rounded p-1 text-[10px] text-amber-100 focus:border-amber-500 focus:outline-none"
+                                                >
+                                                    <option value="single">Single Image</option>
+                                                    <option value="double-horizontal">2 Images - Horizontal</option>
+                                                    <option value="double-vertical">2 Images - Vertical</option>
+                                                    <option value="triple-grid">3 Images - Grid</option>
+                                                </select>
+                                                <span className="text-[8px] text-amber-800 block mt-1">
+                                                    {(p.images || [p.image]).filter(Boolean).length} image(s)
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* --- QR Code Modal --- */}
+                    {showQR && (
+                        <div className="absolute inset-0 bg-black/90 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+                            <div className="bg-[#f4e4bc] p-8 rounded-lg shadow-2xl max-w-md w-full relative text-center border-4 border-amber-900/50">
+                                <button onClick={() => setShowQR(false)} className="absolute top-2 right-2 text-amber-900 hover:text-red-600"><X /></button>
+                                <h2 className="text-2xl font-cinzel text-amber-950 font-bold mb-2">Scan for Catalog</h2>
+                                <p className="text-amber-900/70 italic font-serif mb-6">Skip the wait. View the full portfolio on your device.</p>
+                                <div className="bg-white p-4 rounded-lg inline-block shadow-inner mb-4 relative group">
+                                    <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(networkUrl)}&color=3e2b20`} alt="QR Code" className="w-48 h-48 mix-blend-multiply" />
+                                </div>
+
+                                {/* Network Instructions */}
+                                <div className="text-left bg-amber-900/10 p-3 rounded mb-4 text-xs">
+                                    <p className="font-bold text-amber-950 mb-2">📱 For Mobile Access:</p>
+                                    <p className="text-amber-900/80 mb-1">Current URL:</p>
+                                    <p className="font-mono text-[10px] text-amber-900 bg-white/50 p-2 rounded break-all mb-2">{networkUrl}</p>
+                                    <p className="text-amber-900/70 text-[10px] italic">
+                                        💡 If using live-server, replace "localhost" or "127.0.0.1" with your computer's IP address
+                                        (e.g., 192.168.1.x:5500). Make sure your phone is on the same WiFi network.
+                                    </p>
+                                </div>
+
+                                <div className="flex items-center justify-center gap-2 text-amber-900/80 font-cinzel font-bold"><span>{artistHandle}</span></div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        function PageContent({ page, bookTitle, bookSubtitle, coverYear, coverLogo, coverStyle, coverImage, backTitle, backDescription, artistHandle, backCoverQrUrl, palette, isBackSide, typography = {} }) {
+            const accentColor = palette.accent;
+            const textPrimary = palette.textPrimary;
+            const textSecondary = palette.textSecondary;
+            
+            // Typography with fallbacks
+            const fonts = {
+                title: typography.titleFont || "'Cinzel', serif",
+                subtitle: typography.subtitleFont || "'IM Fell English', serif",
+                year: typography.yearFont || "'Cinzel', serif",
+                backTitle: typography.backTitleFont || "'Cinzel', serif",
+                handle: typography.handleFont || "'IM Fell English', serif",
+                description: typography.descriptionFont || "'IM Fell English', serif"
+            };
+            
+            const colors = {
+                title: typography.titleColor || textPrimary,
+                subtitle: typography.subtitleColor || `${textSecondary}cc`,
+                year: typography.yearColor || `${textSecondary}99`,
+                backTitle: typography.backTitleColor || textPrimary,
+                handle: typography.handleColor || textSecondary,
+                description: typography.descriptionColor || `${textSecondary}80`
+            };
+
+            if (page.type === 'cover') {
+                if (coverStyle === 'custom-image' && coverImage) {
+                    // Custom Image Cover
+                    return (
+                        <div className="w-full h-full relative overflow-hidden">
+                            {/* Cover Image */}
+                            <img
+                                src={coverImage}
+                                alt="Cover"
+                                className="w-full h-full object-cover"
+                            />
+
+                            {/* Dark overlay for better text contrast */}
+                            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
+
+                            {/* Book title at top */}
+                            <div className="absolute top-12 md:top-16 left-0 right-0 text-center px-6">
+                                <h1 className="text-2xl md:text-3xl lg:text-4xl tracking-widest uppercase"
+                                    style={{
+                                        fontFamily: fonts.title,
+                                        color: typography.titleColor || '#ffffff',
+                                        textShadow: '3px 3px 6px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.5)',
+                                        letterSpacing: '0.2em'
+                                    }}>
+                                    {bookTitle}
+                                </h1>
+                            </div>
+
+                            {/* Subtitle at bottom */}
+                            <div className="absolute bottom-12 md:bottom-16 left-0 right-0 text-center px-6">
+                                <p className="text-base md:text-lg lg:text-xl italic"
+                                    style={{
+                                        fontFamily: fonts.subtitle,
+                                        color: typography.subtitleColor || '#f0f0f0',
+                                        textShadow: '2px 2px 4px rgba(0,0,0,0.9)'
+                                    }}>
+                                    {bookSubtitle}
+                                </p>
+                                <p className="mt-4 text-sm"
+                                    style={{
+                                        fontFamily: fonts.year,
+                                        color: typography.yearColor || '#e0e0e0',
+                                        textShadow: '1px 1px 3px rgba(0,0,0,0.9)'
+                                    }}>
+                                    {coverYear}
+                                </p>
+                            </div>
+                        </div>
+                    );
+                }
+
+                // Standard cover
+                return (
+                    <div className="w-full h-full flex flex-col items-center justify-center p-6 md:p-8 text-center border-4 border-double m-4"
+                        style={{ borderColor: `${textSecondary}20` }}>
+                        {coverLogo ? (
+                            <div className="mb-6">
+                                <img src={coverLogo} alt="Logo" className="w-20 h-20 md:w-24 md:h-24 object-contain opacity-90" />
+                            </div>
+                        ) : (
+                            <div className="w-12 h-12 md:w-16 md:h-16 mb-4 md:mb-6 opacity-80" style={{ color: textSecondary }}>
+                                <Book size={48} className="md:hidden" strokeWidth={1} />
+                                <Book size={64} className="hidden md:block" strokeWidth={1} />
+                            </div>
+                        )}
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl mb-3 md:mb-4 tracking-wider uppercase break-words w-full px-2"
+                            style={{ fontFamily: fonts.title, color: colors.title }}>{bookTitle}</h1>
+                        <div className="h-px w-24 md:w-32 my-3 md:my-4" style={{ backgroundColor: `${textSecondary}40` }} />
+                        <h2 className="text-base md:text-xl italic px-4" style={{ fontFamily: fonts.subtitle, color: colors.subtitle }}>{bookSubtitle}</h2>
+                        <p className="mt-8 md:mt-12 text-xs md:text-sm" style={{ fontFamily: fonts.year, color: colors.year }}>{coverYear}</p>
+                        <p className="mt-2 text-[10px] md:text-xs" style={{ color: `${textSecondary}66` }}>Swipe to open</p>
+                    </div>
+                );
+            }
+            if (page.type === 'back-cover') {
+                // Determine QR code URL - use custom URL if set, otherwise default to Instagram
+                const qrUrl = backCoverQrUrl || `https://instagram.com/${artistHandle.replace('@', '')}`;
+                const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrUrl)}&color=3e2b20&bgcolor=f4e4bc`;
+                
+                return (
+                    <div className="w-full h-full flex flex-col items-center justify-center p-6 md:p-8 text-center m-4 border-4"
+                        style={{ backgroundColor: `${textSecondary}08`, borderColor: `${textSecondary}10` }}>
+                        {/* QR Code */}
+                        <div className="w-24 h-24 md:w-28 md:h-28 rounded-lg flex items-center justify-center mb-4 md:mb-6 overflow-hidden bg-[#f4e4bc] p-1 shadow-inner"
+                            style={{ border: `2px solid ${textSecondary}30` }}>
+                            <img 
+                                src={qrApiUrl} 
+                                alt="QR Code" 
+                                className="w-full h-full object-contain"
+                            />
+                        </div>
+                        <h2 className="text-xl md:text-2xl mb-2" style={{ fontFamily: fonts.backTitle, color: colors.backTitle }}>{backTitle}</h2>
+                        <p className="text-base md:text-lg mb-6 md:mb-8" style={{ fontFamily: fonts.handle, color: colors.handle }}>{artistHandle}</p>
+                        <div className="text-xs max-w-[85%] md:max-w-[200px] leading-relaxed" style={{ fontFamily: fonts.description, color: colors.description }}>{backDescription}</div>
+                    </div>
+                );
+            }
+            // Support both old format (single image) and new format (images array)
+            const pageImages = page.images || (page.image ? [page.image] : []);
+            const layout = page.layout || 'single';
+
+            // Render image grid based on layout
+            const renderImageGrid = () => {
+                if (layout === 'single') {
+                    return (
+                        <div className="w-full h-full overflow-hidden rounded border shadow-inner"
+                            style={{ borderColor: `${textSecondary}20`, backgroundColor: palette.pageBack }}>
+                            <img src={pageImages[0]} alt={page.caption} className="w-full h-full object-contain mix-blend-multiply opacity-90 p-2 md:p-4" />
+                        </div>
+                    );
+                } else if (layout === 'double-horizontal') {
+                    return (
+                        <div className="w-full h-full grid grid-cols-2 gap-2 md:gap-3">
+                            {pageImages.slice(0, 2).map((img, idx) => (
+                                <div key={idx} className="overflow-hidden rounded border shadow-inner"
+                                    style={{ borderColor: `${textSecondary}20`, backgroundColor: palette.pageBack }}>
+                                    <img src={img} alt={`${page.caption} ${idx + 1}`} className="w-full h-full object-contain mix-blend-multiply opacity-90 p-1 md:p-2" />
+                                </div>
+                            ))}
+                        </div>
+                    );
+                } else if (layout === 'double-vertical') {
+                    return (
+                        <div className="w-full h-full grid grid-rows-2 gap-2 md:gap-3">
+                            {pageImages.slice(0, 2).map((img, idx) => (
+                                <div key={idx} className="overflow-hidden rounded border shadow-inner"
+                                    style={{ borderColor: `${textSecondary}20`, backgroundColor: palette.pageBack }}>
+                                    <img src={img} alt={`${page.caption} ${idx + 1}`} className="w-full h-full object-contain mix-blend-multiply opacity-90 p-1 md:p-2" />
+                                </div>
+                            ))}
+                        </div>
+                    );
+                } else if (layout === 'triple-grid') {
+                    return (
+                        <div className="w-full h-full grid grid-cols-2 grid-rows-2 gap-2 md:gap-3">
+                            {pageImages.slice(0, 3).map((img, idx) => (
+                                <div key={idx} className={`overflow-hidden rounded border shadow-inner ${idx === 0 ? 'row-span-2' : ''}`}
+                                    style={{ borderColor: `${textSecondary}20`, backgroundColor: palette.pageBack }}>
+                                    <img src={img} alt={`${page.caption} ${idx + 1}`} className="w-full h-full object-contain mix-blend-multiply opacity-90 p-1 md:p-2" />
+                                </div>
+                            ))}
+                        </div>
+                    );
+                }
+            };
+
+            return (
+                <div className={`w-full h-full p-4 md:p-6 lg:p-8 flex flex-col relative group ${isBackSide ? 'transform scale-x-[-1]' : ''}`}>
+                    <div className="absolute top-3 left-3 md:top-4 md:left-4 w-12 h-12 md:w-16 md:h-16 border-t-2 border-l-2 rounded-tl-lg pointer-events-none"
+                        style={{ borderColor: `${textSecondary}10` }} />
+                    <div className="absolute top-3 right-3 md:top-4 md:right-4 w-12 h-12 md:w-16 md:h-16 border-t-2 border-r-2 rounded-tr-lg pointer-events-none"
+                        style={{ borderColor: `${textSecondary}10` }} />
+                    <div className="absolute bottom-3 left-3 md:bottom-4 md:left-4 w-12 h-12 md:w-16 md:h-16 border-b-2 border-l-2 rounded-bl-lg pointer-events-none"
+                        style={{ borderColor: `${textSecondary}10` }} />
+                    <div className="absolute bottom-3 right-3 md:bottom-4 md:right-4 w-12 h-12 md:w-16 md:h-16 border-b-2 border-r-2 rounded-br-lg pointer-events-none"
+                        style={{ borderColor: `${textSecondary}10` }} />
+
+                    {/* Image Grid Container */}
+                    <div className="relative h-3/4 w-full">
+                        {renderImageGrid()}
+                    </div>
+
+                    {/* Caption and Description */}
+                    <div className="flex-1 flex flex-col items-center justify-center text-center mt-3 md:mt-4">
+                        <h3 className="font-cinzel text-base md:text-lg lg:text-xl mb-1 md:mb-2 px-2" style={{ color: textPrimary }}>{page.caption}</h3>
+                        {page.description && <p className="font-im-fell text-xs md:text-sm max-w-[90%] md:max-w-[80%] leading-relaxed" style={{ color: `${textSecondary}cc` }}>{page.description}</p>}
+                        {page.text && <p className="font-im-fell text-xs md:text-sm max-w-[90%] md:max-w-[80%] leading-relaxed" style={{ color: `${textSecondary}cc` }}>{page.text}</p>}
+                    </div>
+                    <div className="absolute bottom-1 right-2 md:bottom-2 md:right-4 text-[8px] md:text-[10px] font-mono" style={{ color: `${textSecondary}30` }}>Ref: {page.id}</div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<TattooBookApp />);
+    </script>
+</body>
+</html>
+```

@@ -1,0 +1,63 @@
+{
+  "artistHandle": "@inkgrimoire",
+  "bookTitle": "The Ink Grimoire",
+  "bookSubtitle": "Fine Line & Geometric",
+  "coverYear": "Est. 2025",
+  "coverStyle": "standard",
+  "coverImage": "",
+  "coverLogo": "",
+  "currentPalette": "classic",
+  "backTitle": "Scan to Book",
+  "backDescription": "Scan the QR code to view this portfolio on your phone and book your appointment.",
+  "transitionEffect": "flip",
+  "backCoverQrUrl": "https://instagram.com/inkgrimoire",
+  "typography": {
+    "titleFont": "Cinzel",
+    "subtitleFont": "IM Fell English",
+    "yearFont": "Cinzel",
+    "backTitleFont": "Cinzel",
+    "handleFont": "IM Fell English",
+    "descriptionFont": "IM Fell English",
+    "titleColor": null,
+    "subtitleColor": null,
+    "yearColor": null,
+    "backTitleColor": null,
+    "handleColor": null,
+    "descriptionColor": null
+  },
+  "pages": [
+    { "id": "cover", "type": "cover" },
+    {
+      "id": "page-1",
+      "type": "tattoo",
+      "images": [
+        "https://images.unsplash.com/photo-1611501275019-9b5cda994e8d?w=800"
+      ],
+      "layout": "single",
+      "caption": "Geometric Serpent",
+      "description": "Fine line work with dotwork shading. Inspired by sacred geometry and ancient symbolism."
+    },
+    {
+      "id": "page-2",
+      "type": "tattoo",
+      "images": [
+        "https://images.unsplash.com/photo-1590246815117-a3f26c4d9e5e?w=800"
+      ],
+      "layout": "single",
+      "caption": "Botanical Studies",
+      "description": "Delicate floral designs with fine stippling technique. Each piece tells a story."
+    },
+    {
+      "id": "page-3",
+      "type": "tattoo",
+      "images": [
+        "https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?w=800",
+        "https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?w=800"
+      ],
+      "layout": "double-horizontal",
+      "caption": "Pattern Collection",
+      "description": "Geometric designs and ornamental borders. Perfect for bands and larger pieces."
+    },
+    { "id": "back-cover", "type": "back-cover" }
+  ]
+}
